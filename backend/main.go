@@ -25,12 +25,14 @@ func main() {
 
 	r := gin.Default()
 
+	log.Printf("CORS allowed origin: %s", cfg.CORSOrigin)
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{cfg.CORSOrigin},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Set-Cookie"},
 		AllowCredentials: true,
+		MaxAge:           86400,
 	}))
 
 	// Health check endpoint for production deployments
