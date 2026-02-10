@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"sync/atomic"
 
 	"deals-backend/config"
 	"deals-backend/db"
@@ -20,13 +21,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	dbReady := true
-	if err := db.Init(cfg.DatabaseURL); err != nil {
-		log.Printf("WARNING: Failed to initialize database: %v", err)
-		log.Printf("Server will start but database-dependent endpoints will fail")
-		dbReady = false
-	}
-	defer db.Close()
+	var dbReady atomic.Bool
 
 	r := gin.Default()
 
@@ -40,8 +35,9 @@ func main() {
 
 	// Health check endpoint for production deployments
 	r.GET("/health", func(c *gin.Context) {
-		status := gin.H{"status": "ok", "database": dbReady}
-		if !dbReady {
+		ready := dbReady.Load()
+		status := gin.H{"status": "ok", "database": ready}
+		if !ready {
 			c.JSON(http.StatusServiceUnavailable, status)
 			return
 		}
@@ -51,7 +47,7 @@ func main() {
 	// Guard database-dependent routes against nil Pool
 	dbRequired := func(c *gin.Context) {
 		if db.Pool == nil {
-			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available yet, please retry shortly"})
 			c.Abort()
 			return
 		}
@@ -77,6 +73,18 @@ func main() {
 		admin.PUT("/deals/:id", dealHandler.UpdateDeal)
 		admin.DELETE("/deals/:id", dealHandler.DeleteDeal)
 	}
+
+	// Initialize database in background so server starts immediately
+	go func() {
+		log.Printf("Connecting to database...")
+		if err := db.Init(cfg.DatabaseURL); err != nil {
+			log.Printf("WARNING: Failed to initialize database: %v", err)
+			log.Printf("Database-dependent endpoints will return 503")
+			return
+		}
+		dbReady.Store(true)
+		log.Printf("Database ready")
+	}()
 
 	log.Printf("Server starting on port %s", cfg.Port)
 	if err := r.Run(":" + cfg.Port); err != nil {
