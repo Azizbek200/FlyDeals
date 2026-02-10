@@ -16,6 +16,10 @@ type Config struct {
 func Load() *Config {
 	env := getEnv("GO_ENV", "development")
 	corsOrigin := getEnv("CORS_ORIGIN", "http://localhost:3000")
+	// Ensure CORS origin has a scheme (common misconfiguration)
+	if corsOrigin != "" && !strings.HasPrefix(corsOrigin, "http://") && !strings.HasPrefix(corsOrigin, "https://") {
+		corsOrigin = "https://" + corsOrigin
+	}
 	isProduction := env == "production" || (!strings.Contains(corsOrigin, "localhost") && !strings.Contains(corsOrigin, "127.0.0.1"))
 
 	// Railway sets DATABASE_PRIVATE_URL for internal networking

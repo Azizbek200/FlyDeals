@@ -48,19 +48,29 @@ func main() {
 		c.JSON(http.StatusOK, status)
 	})
 
+	// Guard database-dependent routes against nil Pool
+	dbRequired := func(c *gin.Context) {
+		if db.Pool == nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database not available"})
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+
 	authHandler := handlers.NewAuthHandler(cfg)
 	dealHandler := handlers.NewDealHandler()
 
 	// Public routes
-	r.GET("/deals", dealHandler.ListPublicDeals)
-	r.GET("/deals/:slug", dealHandler.GetPublicDeal)
+	r.GET("/deals", dbRequired, dealHandler.ListPublicDeals)
+	r.GET("/deals/:slug", dbRequired, dealHandler.GetPublicDeal)
 
 	// Auth route
-	r.POST("/admin/login", authHandler.Login)
+	r.POST("/admin/login", dbRequired, authHandler.Login)
 
 	// Protected admin routes
 	admin := r.Group("/admin")
-	admin.Use(middleware.AuthRequired(cfg))
+	admin.Use(dbRequired, middleware.AuthRequired(cfg))
 	{
 		admin.GET("/deals", dealHandler.ListAdminDeals)
 		admin.POST("/deals", dealHandler.CreateDeal)
