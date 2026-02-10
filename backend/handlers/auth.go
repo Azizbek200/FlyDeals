@@ -57,8 +57,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("token", tokenString, 72*3600, "/", "", false, true)
+	if h.Config.IsProduction {
+		c.SetSameSite(http.SameSiteNoneMode)
+		c.SetCookie("token", tokenString, 72*3600, "/", "", true, true)
+	} else {
+		c.SetSameSite(http.SameSiteLaxMode)
+		c.SetCookie("token", tokenString, 72*3600, "/", "", false, true)
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
