@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 
 	"deals-backend/config"
 	"deals-backend/db"
@@ -15,6 +16,10 @@ import (
 func main() {
 	cfg := config.Load()
 
+	if cfg.IsProduction {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	if err := db.Init(cfg.DatabaseURL); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
@@ -26,8 +31,14 @@ func main() {
 		AllowOrigins:     []string{cfg.CORSOrigin},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Set-Cookie"},
 		AllowCredentials: true,
 	}))
+
+	// Health check endpoint for production deployments
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
 
 	authHandler := handlers.NewAuthHandler(cfg)
 	dealHandler := handlers.NewDealHandler()

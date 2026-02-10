@@ -51,9 +51,15 @@ async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
+  const { headers: customHeaders, ...restOptions } = options;
   const res = await fetch(`${API_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
+    credentials: "include",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      ...(customHeaders as Record<string, string>),
+    },
+    ...restOptions,
   });
 
   if (!res.ok) {
@@ -86,7 +92,6 @@ export async function adminLogin(
 ): Promise<{ message: string }> {
   return request<{ message: string }>("/admin/login", {
     method: "POST",
-    credentials: "include",
     body: JSON.stringify({ email, password }),
   });
 }
@@ -95,15 +100,12 @@ export async function getAdminDeals(
   page = 1,
   limit = 50
 ): Promise<DealsResponse> {
-  return request<DealsResponse>(`/admin/deals?page=${page}&limit=${limit}`, {
-    credentials: "include",
-  });
+  return request<DealsResponse>(`/admin/deals?page=${page}&limit=${limit}`);
 }
 
 export async function createDeal(data: CreateDealInput): Promise<Deal> {
   return request<Deal>("/admin/deals", {
     method: "POST",
-    credentials: "include",
     body: JSON.stringify(data),
   });
 }
@@ -114,7 +116,6 @@ export async function updateDeal(
 ): Promise<Deal> {
   return request<Deal>(`/admin/deals/${id}`, {
     method: "PUT",
-    credentials: "include",
     body: JSON.stringify(data),
   });
 }
@@ -122,6 +123,5 @@ export async function updateDeal(
 export async function deleteDeal(id: number): Promise<{ message: string }> {
   return request<{ message: string }>(`/admin/deals/${id}`, {
     method: "DELETE",
-    credentials: "include",
   });
 }

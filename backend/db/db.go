@@ -2,14 +2,16 @@ package db
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
-	"runtime"
+	"sort"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+//go:embed migrations/*.sql
+var migrationsFS embed.FS
 
 var Pool *pgxpool.Pool
 
@@ -34,21 +36,21 @@ func Init(databaseURL string) error {
 }
 
 func runMigrations() error {
-	_, filename, _, _ := runtime.Caller(0)
-	migrationsDir := filepath.Join(filepath.Dir(filename), "migrations")
-
-	entries, err := os.ReadDir(migrationsDir)
+	entries, err := migrationsFS.ReadDir("migrations")
 	if err != nil {
 		return fmt.Errorf("failed to read migrations directory: %w", err)
 	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Name() < entries[j].Name()
+	})
 
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
 		}
 
-		path := filepath.Join(migrationsDir, entry.Name())
-		sql, err := os.ReadFile(path)
+		sql, err := migrationsFS.ReadFile("migrations/" + entry.Name())
 		if err != nil {
 			return fmt.Errorf("failed to read migration %s: %w", entry.Name(), err)
 		}
