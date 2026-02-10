@@ -20,8 +20,11 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
+	dbReady := true
 	if err := db.Init(cfg.DatabaseURL); err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
+		log.Printf("WARNING: Failed to initialize database: %v", err)
+		log.Printf("Server will start but database-dependent endpoints will fail")
+		dbReady = false
 	}
 	defer db.Close()
 
@@ -37,7 +40,12 @@ func main() {
 
 	// Health check endpoint for production deployments
 	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+		status := gin.H{"status": "ok", "database": dbReady}
+		if !dbReady {
+			c.JSON(http.StatusServiceUnavailable, status)
+			return
+		}
+		c.JSON(http.StatusOK, status)
 	})
 
 	authHandler := handlers.NewAuthHandler(cfg)

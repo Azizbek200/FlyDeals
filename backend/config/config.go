@@ -18,8 +18,14 @@ func Load() *Config {
 	corsOrigin := getEnv("CORS_ORIGIN", "http://localhost:3000")
 	isProduction := env == "production" || (!strings.Contains(corsOrigin, "localhost") && !strings.Contains(corsOrigin, "127.0.0.1"))
 
+	// Railway sets DATABASE_PRIVATE_URL for internal networking
+	dbURL := getEnv("DATABASE_URL", "")
+	if dbURL == "" {
+		dbURL = getEnv("DATABASE_PRIVATE_URL", "postgres://user:password@localhost:5432/deals?sslmode=disable")
+	}
+
 	return &Config{
-		DatabaseURL:  getEnv("DATABASE_URL", "postgres://user:password@localhost:5432/deals?sslmode=disable"),
+		DatabaseURL:  dbURL,
 		JWTSecret:    getEnv("JWT_SECRET", "change-me-in-production"),
 		CORSOrigin:   corsOrigin,
 		Port:         getEnv("PORT", "8080"),
