@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -16,13 +17,19 @@ var migrationsFS embed.FS
 var Pool *pgxpool.Pool
 
 func Init(databaseURL string) error {
+	// Use a 10s timeout so DB issues don't block server startup
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
 	var err error
-	Pool, err = pgxpool.New(context.Background(), databaseURL)
+	Pool, err = pgxpool.New(ctx, databaseURL)
 	if err != nil {
 		return fmt.Errorf("unable to connect to database: %w", err)
 	}
 
-	if err := Pool.Ping(context.Background()); err != nil {
+	if err := Pool.Ping(ctx); err != nil {
+		Pool.Close()
+		Pool = nil
 		return fmt.Errorf("unable to ping database: %w", err)
 	}
 
