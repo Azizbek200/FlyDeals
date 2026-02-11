@@ -4,6 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import AdminNav from "@/components/AdminNav";
 import DealForm from "@/components/DealForm";
+import useAuth from "@/lib/useAuth";
 import {
   Deal,
   getAdminDeals,
@@ -18,11 +19,14 @@ export default function AdminEditDealPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const authenticated = useAuth();
   const [deal, setDeal] = useState<Deal | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!authenticated) return;
+
     const fetchDeal = async () => {
       try {
         const data = await getAdminDeals(1, 100);
@@ -44,12 +48,14 @@ export default function AdminEditDealPage({
     };
 
     fetchDeal();
-  }, [id, router]);
+  }, [id, router, authenticated]);
 
   const handleSubmit = async (data: CreateDealInput) => {
     await updateDeal(parseInt(id), data);
     router.push("/admin/deals");
   };
+
+  if (!authenticated) return null;
 
   return (
     <>

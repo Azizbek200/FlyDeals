@@ -3,15 +3,19 @@
 import { useRouter } from "next/navigation";
 import AdminNav from "@/components/AdminNav";
 import DealForm from "@/components/DealForm";
+import useAuth from "@/lib/useAuth";
 import { createDeal, CreateDealInput } from "@/lib/api";
 
 export default function AdminNewDealPage() {
   const router = useRouter();
+  const authenticated = useAuth();
 
   const handleSubmit = async (data: CreateDealInput) => {
     await createDeal(data);
     router.push("/admin/deals");
   };
+
+  if (!authenticated) return null;
 
   return (
     <>

@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminNav from "@/components/AdminNav";
+import useAuth from "@/lib/useAuth";
 import { Deal, getAdminDeals, updateDeal, deleteDeal } from "@/lib/api";
 
 export default function AdminDealsPage() {
   const router = useRouter();
+  const authenticated = useAuth();
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -28,8 +30,8 @@ export default function AdminDealsPage() {
   };
 
   useEffect(() => {
-    fetchDeals();
-  }, []);
+    if (authenticated) fetchDeals();
+  }, [authenticated]);
 
   const handleTogglePublished = async (deal: Deal) => {
     try {
@@ -54,6 +56,8 @@ export default function AdminDealsPage() {
       setError(err instanceof Error ? err.message : "Failed to delete deal");
     }
   };
+
+  if (!authenticated) return null;
 
   return (
     <>
