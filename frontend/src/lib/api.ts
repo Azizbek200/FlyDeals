@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+// Use same-origin /api proxy (via Next.js rewrites) to avoid cross-origin
+// issues in Safari. The rewrite forwards to NEXT_PUBLIC_API_URL on the server.
+const API_URL = "/api";
 
 export interface Deal {
   id: number;
