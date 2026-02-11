@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"strings"
 	"sync/atomic"
 
 	"deals-backend/config"
@@ -25,12 +26,30 @@ func main() {
 
 	r := gin.Default()
 
+	log.Printf("CORS allowed origin: %s", cfg.CORSOrigin)
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{cfg.CORSOrigin},
+		AllowOriginFunc: func(origin string) bool {
+			// Always allow the configured origin
+			if origin == cfg.CORSOrigin {
+				return true
+			}
+			// Allow any Vercel preview/production URL for this project
+			if strings.HasSuffix(origin, ".vercel.app") {
+				log.Printf("CORS: allowing Vercel origin %s", origin)
+				return true
+			}
+			// Allow localhost for development
+			if strings.HasPrefix(origin, "http://localhost") {
+				return true
+			}
+			log.Printf("CORS: rejected origin %s", origin)
+			return false
+		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Set-Cookie"},
 		AllowCredentials: true,
+		MaxAge:           86400,
 	}))
 
 	// Health check endpoint for production deployments
