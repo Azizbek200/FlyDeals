@@ -63,6 +63,17 @@ func main() {
 		c.JSON(http.StatusOK, status)
 	})
 
+	// Debug endpoint to inspect request headers (remove after debugging)
+	r.GET("/debug/headers", func(c *gin.Context) {
+		headers := make(map[string]string)
+		for k, v := range c.Request.Header {
+			if len(v) > 0 {
+				headers[k] = v[0]
+			}
+		}
+		c.JSON(http.StatusOK, gin.H{"headers": headers, "method": c.Request.Method})
+	})
+
 	// Guard database-dependent routes against nil Pool
 	dbRequired := func(c *gin.Context) {
 		if db.Pool == nil {
