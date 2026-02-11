@@ -47,16 +47,35 @@ class ApiError extends Error {
   }
 }
 
+function getToken(): string | null {
+  if (typeof window === "undefined") return null;
+  return localStorage.getItem("admin_token");
+}
+
+export function setToken(token: string): void {
+  localStorage.setItem("admin_token", token);
+}
+
+export function clearToken(): void {
+  localStorage.removeItem("admin_token");
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
   const { headers: customHeaders, ...restOptions } = options;
+  const authHeaders: Record<string, string> = {};
+  const token = getToken();
+  if (token) {
+    authHeaders["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_URL}${path}`, {
-    credentials: "include",
     cache: "no-store",
     headers: {
       "Content-Type": "application/json",
+      ...authHeaders,
       ...(customHeaders as Record<string, string>),
     },
     ...restOptions,
@@ -89,11 +108,13 @@ export async function getDealBySlug(slug: string): Promise<Deal> {
 export async function adminLogin(
   email: string,
   password: string
-): Promise<{ message: string }> {
-  return request<{ message: string }>("/admin/login", {
+): Promise<{ message: string; token: string }> {
+  const res = await request<{ message: string; token: string }>("/admin/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
+  setToken(res.token);
+  return res;
 }
 
 export async function getAdminDeals(

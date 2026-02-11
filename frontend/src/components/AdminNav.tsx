@@ -1,10 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { clearToken } from "@/lib/api";
 
 export default function AdminNav() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    clearToken();
+    router.push("/admin/login");
+  };
 
   const links = [
     { href: "/admin/deals", label: "All Deals" },
@@ -34,12 +41,20 @@ export default function AdminNav() {
             ))}
           </div>
         </div>
-        <Link
-          href="/"
-          className="text-sm text-gray-400 hover:text-white"
-        >
-          View Site
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/"
+            className="text-sm text-gray-400 hover:text-white"
+          >
+            View Site
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-gray-400 hover:text-white"
+          >
+            Logout
+          </button>
+        </div>
       </div>
     </nav>
   );

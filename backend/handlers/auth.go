@@ -67,6 +67,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
+		"token":   tokenString,
 		"admin": gin.H{
 			"id":    admin.ID,
 			"email": admin.Email,
