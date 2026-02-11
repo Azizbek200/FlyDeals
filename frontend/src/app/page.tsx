@@ -20,37 +20,65 @@ export default async function HomePage() {
       <Header />
       <main className="flex-1 bg-gray-50 min-h-screen">
         {/* Hero */}
-        <section className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white py-14 sm:py-20">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-4 sm:mb-5 leading-tight animate-fade-in-up">
-              Find Amazing Flight Deals
-            </h1>
-            <p className="text-gray-300 text-base sm:text-xl max-w-2xl mx-auto leading-relaxed animate-fade-in-up-delay-1">
-              Handpicked cheap flights and error fares to destinations around the world.
-              Save hundreds on your next trip!
+        <section className="relative overflow-hidden bg-slate-900 text-white py-16 sm:py-24">
+          {/* Subtle gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(249,115,22,0.08),_transparent_60%)]" />
+
+          <div className="relative max-w-7xl mx-auto px-4 text-center">
+            <p className="text-orange-400 text-sm font-semibold uppercase tracking-widest mb-4 animate-fade-in-up">
+              Fly more for less
             </p>
-            <div className="mt-6 sm:mt-8 flex items-center justify-center gap-3 sm:gap-4 flex-wrap animate-fade-in-up-delay-2">
-              <div className="flex items-center gap-2 bg-white/10 px-3 sm:px-4 py-2 rounded-full backdrop-blur-sm">
-                <span className="text-orange-400">🔥</span>
-                <span className="text-xs sm:text-sm">Updated Daily</span>
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-5 leading-[1.1] tracking-tight animate-fade-in-up">
+              Flight deals you won&apos;t<br className="hidden sm:block" /> find anywhere else
+            </h1>
+            <p className="text-gray-400 text-base sm:text-lg max-w-xl mx-auto leading-relaxed animate-fade-in-up-delay-1">
+              We scan hundreds of sources daily to find mistake fares, sales, and hidden deals — so you save hundreds on every trip.
+            </p>
+
+            <div className="mt-8 sm:mt-10 flex items-center justify-center gap-3 sm:gap-5 flex-wrap animate-fade-in-up-delay-2">
+              {/* SVG icons instead of emojis */}
+              <div className="flex items-center gap-2 text-gray-300">
+                <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-xs sm:text-sm">Updated daily</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/10 px-3 sm:px-4 py-2 rounded-full backdrop-blur-sm">
-                <span className="text-orange-400">💰</span>
-                <span className="text-xs sm:text-sm">Best Prices</span>
+              <span className="text-gray-600 hidden sm:inline">|</span>
+              <div className="flex items-center gap-2 text-gray-300">
+                <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                </svg>
+                <span className="text-xs sm:text-sm">Best prices guaranteed</span>
               </div>
-              <div className="flex items-center gap-2 bg-white/10 px-3 sm:px-4 py-2 rounded-full backdrop-blur-sm">
-                <span className="text-orange-400">🌍</span>
-                <span className="text-xs sm:text-sm">Worldwide</span>
+              <span className="text-gray-600 hidden sm:inline">|</span>
+              <div className="flex items-center gap-2 text-gray-300">
+                <svg className="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-xs sm:text-sm">Worldwide destinations</span>
               </div>
+            </div>
+
+            <div className="mt-8 animate-fade-in-up-delay-2">
+              <a
+                href="#deals"
+                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition-all hover:shadow-lg hover:shadow-orange-500/25 text-sm"
+              >
+                Browse Deals
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </a>
             </div>
           </div>
         </section>
 
         {/* Deals Section */}
-        <section className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
-          <div className="mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Latest Flight Deals</h2>
-            <p className="text-gray-600 text-sm sm:text-base">Check out our newest and hottest deals</p>
+        <section id="deals" className="max-w-7xl mx-auto px-4 py-10 sm:py-14">
+          <div className="mb-8 sm:mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">Latest Deals</h2>
+            <p className="text-gray-500 text-sm sm:text-base mt-1">The freshest flight deals, hand-picked for you</p>
           </div>
 
           {error && (
@@ -60,12 +88,14 @@ export default async function HomePage() {
           )}
 
           {deals.length === 0 && !error ? (
-            <div className="text-center py-16 sm:py-20 bg-white rounded-xl shadow-sm">
-              <div className="text-5xl sm:text-6xl mb-4">✈️</div>
-              <p className="text-gray-500 text-base sm:text-lg">No deals available at the moment. Check back soon!</p>
+            <div className="text-center py-16 sm:py-24 bg-white rounded-2xl border border-gray-200">
+              <svg className="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+              </svg>
+              <p className="text-gray-400 text-base">No deals available yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-5">
               {deals.map((deal, index) => (
                 <ScrollReveal key={deal.id} delay={index * 80}>
                   <DealCard deal={deal} />
