@@ -3,7 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FlyDeals - Find the Best Flight Deals",
+  title: "FlyDeals - Fly More for Less",
   description:
     "Discover amazing flight deals and cheap airfare to destinations worldwide.",
 };
