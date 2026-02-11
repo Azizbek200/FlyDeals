@@ -46,10 +46,10 @@ export default function Footer() {
 
           {/* Social */}
           <div>
-            <h3 className="text-white text-sm font-semibold uppercase tracking-wider mb-4">Follow Us</h3>
+            <h3 className="text-white text-sm font-semibold uppercase tracking-wider mb-4">Follow</h3>
             <div className="flex gap-3">
               <a
-                href="#"
+                href="https://x.com/Just_Azizbek"
                 aria-label="Twitter"
                 className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center hover:bg-orange-500 transition-colors"
               >
@@ -58,7 +58,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/just_az1zbek/"
                 aria-label="Instagram"
                 className="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center hover:bg-orange-500 transition-colors"
               >
