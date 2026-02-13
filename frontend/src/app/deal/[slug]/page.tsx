@@ -1,12 +1,13 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ShareButton from "@/components/ShareButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import CountdownTimer from "@/components/CountdownTimer";
-import { getDealBySlug } from "@/lib/api";
+import { getDealBySlugServer } from "@/lib/api";
 import { notFound } from "next/navigation";
 
 interface Props {
@@ -16,7 +17,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
-    const deal = await getDealBySlug(slug);
+    const deal = await getDealBySlugServer(slug);
     const description = `${deal.departure_city} to ${deal.destination_city} from ${deal.currency} ${deal.price}. ${deal.travel_dates}`;
     const imageUrl = deal.image_url || `https://source.unsplash.com/1200x630/?${encodeURIComponent(deal.destination_city)},travel`;
     return {
@@ -45,7 +46,7 @@ export default async function DealPage({ params }: Props) {
   let deal;
 
   try {
-    deal = await getDealBySlug(slug);
+    deal = await getDealBySlugServer(slug);
   } catch {
     notFound();
   }
@@ -95,10 +96,13 @@ export default async function DealPage({ params }: Props) {
           <article className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200/80 dark:border-gray-700 animate-fade-in-up">
             {/* Hero Image */}
             <div className="relative h-56 sm:h-80 md:h-[26rem] overflow-hidden">
-              <img
+              <Image
                 src={imageUrl}
                 alt={deal.destination_city}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 768px) 100vw, 896px"
+                className="object-cover"
+                priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
