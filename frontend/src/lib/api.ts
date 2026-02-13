@@ -1,57 +1,5 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-// Server-safe fetch (no localStorage, supports Next.js caching)
-async function serverFetch<T>(
-  path: string,
-  options: { revalidate?: number } = {}
-): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    next: { revalidate: options.revalidate ?? 300 },
-    headers: { "Content-Type": "application/json" },
-  });
-  if (!res.ok) {
-    throw new Error(`Request failed with status ${res.status}`);
-  }
-  return res.json();
-}
-
-// Server-side data fetching for SSR/ISR pages
-export async function getDealsServer(
-  page = 1,
-  limit = 12,
-  filters: DealFilters = {}
-): Promise<DealsResponse> {
-  const params = new URLSearchParams();
-  params.set("page", String(page));
-  params.set("limit", String(limit));
-  if (filters.q) params.set("q", filters.q);
-  if (filters.departure) params.set("departure", filters.departure);
-  if (filters.destination) params.set("destination", filters.destination);
-  if (filters.min_price !== undefined) params.set("min_price", String(filters.min_price));
-  if (filters.max_price !== undefined) params.set("max_price", String(filters.max_price));
-  if (filters.tag) params.set("tag", filters.tag);
-  if (filters.sort) params.set("sort", filters.sort);
-  return serverFetch<DealsResponse>(`/deals?${params.toString()}`);
-}
-
-export async function getFilterOptionsServer(): Promise<{
-  departures: string[];
-  destinations: string[];
-  tags: string[];
-}> {
-  const data = await serverFetch<DealsResponse>(`/deals?page=1&limit=200`, {
-    revalidate: 600,
-  });
-  const departures = [...new Set(data.deals.map((d) => d.departure_city))].sort();
-  const destinations = [...new Set(data.deals.map((d) => d.destination_city))].sort();
-  const tags = [...new Set(data.deals.flatMap((d) => d.tags || []))].sort();
-  return { departures, destinations, tags };
-}
-
-export async function getDealBySlugServer(slug: string): Promise<Deal> {
-  return serverFetch<Deal>(`/deals/${slug}`, { revalidate: 300 });
-}
-
 export interface Deal {
   id: number;
   title: string;

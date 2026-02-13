@@ -47,8 +47,6 @@ export default function RootLayout({
     <html lang="en" className={inter.className} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-        <link rel="dns-prefetch" href="https://images.unsplash.com" />
-        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
       </head>
       <body className="antialiased min-h-screen flex flex-col">
         {children}

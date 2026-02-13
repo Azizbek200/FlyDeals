@@ -1,14 +1,15 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Deal } from "@/lib/api";
 import FavoriteButton from "./FavoriteButton";
 import CountdownTimer from "./CountdownTimer";
 
-export default function DealCard({ deal, priority = false }: { deal: Deal; priority?: boolean }) {
-  const imageUrl = deal.image_url || `https://images.unsplash.com/800x600/?${encodeURIComponent(deal.destination_city)},travel`;
+export default function DealCard({ deal }: { deal: Deal }) {
+  const imageUrl = deal.image_url || `https://source.unsplash.com/800x600/?${encodeURIComponent(deal.destination_city)},travel,destination`;
 
+  // Show "NEW" badge if created within the last 3 days
   const isNew = Date.now() - new Date(deal.created_at).getTime() < 3 * 24 * 60 * 60 * 1000;
 
+  // Savings calculation
   const savings = deal.original_price && deal.original_price > deal.price
     ? Math.round(((deal.original_price - deal.price) / deal.original_price) * 100)
     : null;
@@ -21,15 +22,12 @@ export default function DealCard({ deal, priority = false }: { deal: Deal; prior
       <div className="flex flex-col sm:flex-row">
         {/* Image */}
         <div className="relative w-full sm:w-2/5 h-48 sm:h-auto min-h-[12rem] sm:min-h-[16rem] overflow-hidden bg-gray-100 dark:bg-gray-700">
-          <Image
+          <img
             src={imageUrl}
             alt={deal.destination_city}
-            fill
-            sizes="(max-width: 640px) 100vw, 40vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-            priority={priority}
-            loading={priority ? "eager" : "lazy"}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
           />
+          {/* Gradient for mobile readability */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent sm:hidden" />
 
           {/* Price badge */}
@@ -44,7 +42,7 @@ export default function DealCard({ deal, priority = false }: { deal: Deal; prior
             </div>
           </div>
 
-          {/* Badges */}
+          {/* Badges: top-right */}
           <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex flex-col gap-1.5 items-end">
             {savings && (
               <span className="bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md">
@@ -67,6 +65,7 @@ export default function DealCard({ deal, priority = false }: { deal: Deal; prior
         {/* Content */}
         <div className="flex-1 p-4 sm:p-6 md:p-8 flex flex-col justify-between">
           <div>
+            {/* Route pill */}
             <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-xs sm:text-sm mb-2 sm:mb-3">
               <span className="font-medium">{deal.departure_city}</span>
               <svg className="w-3.5 h-3.5 text-orange-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
@@ -79,6 +78,7 @@ export default function DealCard({ deal, priority = false }: { deal: Deal; prior
               {deal.title}
             </h3>
 
+            {/* Tags */}
             {deal.tags && deal.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {deal.tags.map((tag) => (
