@@ -25,7 +25,12 @@ export default function DealForm({
     content: initialData?.content || "",
     image_url: initialData?.image_url || "",
     published: initialData?.published || false,
+    original_price: initialData?.original_price || undefined,
+    expires_at: initialData?.expires_at || "",
+    scheduled_at: initialData?.scheduled_at || "",
+    tags: initialData?.tags || [],
   });
+  const [tagsInput, setTagsInput] = useState((initialData?.tags || []).join(", "));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -38,9 +43,15 @@ export default function DealForm({
       return;
     }
 
+    // Parse tags from comma-separated input
+    const tags = tagsInput
+      .split(",")
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+
     setLoading(true);
     try {
-      await onSubmit(form);
+      await onSubmit({ ...form, tags });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -100,7 +111,7 @@ export default function DealForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Price *
@@ -113,6 +124,20 @@ export default function DealForm({
             }
             className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="e.g. 49"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Original Price
+          </label>
+          <input
+            type="number"
+            value={form.original_price || ""}
+            onChange={(e) =>
+              setForm({ ...form, original_price: parseInt(e.target.value) || undefined })
+            }
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="e.g. 299"
           />
         </div>
         <div>
@@ -142,6 +167,57 @@ export default function DealForm({
           className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="e.g. March 2026 - May 2026"
         />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Expires At
+          </label>
+          <input
+            type="datetime-local"
+            value={form.expires_at ? form.expires_at.slice(0, 16) : ""}
+            onChange={(e) =>
+              setForm({ ...form, expires_at: e.target.value ? new Date(e.target.value).toISOString() : "" })
+            }
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Schedule Publish
+          </label>
+          <input
+            type="datetime-local"
+            value={form.scheduled_at ? form.scheduled_at.slice(0, 16) : ""}
+            onChange={(e) =>
+              setForm({ ...form, scheduled_at: e.target.value ? new Date(e.target.value).toISOString() : "" })
+            }
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Tags <span className="text-gray-400 font-normal">(comma-separated)</span>
+        </label>
+        <input
+          type="text"
+          value={tagsInput}
+          onChange={(e) => setTagsInput(e.target.value)}
+          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="e.g. Error Fare, Weekend Getaway, Business Class"
+        />
+        {tagsInput && (
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {tagsInput.split(",").map((t) => t.trim()).filter(Boolean).map((t) => (
+              <span key={t} className="px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-600">
+                {t}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div>
@@ -216,8 +292,8 @@ export default function DealForm({
         {loading
           ? "Saving..."
           : isEditing
-          ? "Update Deal"
-          : "Create Deal"}
+            ? "Update Deal"
+            : "Create Deal"}
       </button>
     </form>
   );

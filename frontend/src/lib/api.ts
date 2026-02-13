@@ -13,6 +13,11 @@ export interface Deal {
   content: string;
   image_url?: string;
   published: boolean;
+  original_price?: number;
+  expires_at?: string;
+  scheduled_at?: string;
+  click_count: number;
+  tags: string[];
   created_at: string;
   updated_at: string;
 }
@@ -35,9 +40,36 @@ export interface CreateDealInput {
   content: string;
   image_url?: string;
   published: boolean;
+  original_price?: number;
+  expires_at?: string;
+  scheduled_at?: string;
+  tags?: string[];
 }
 
 export type UpdateDealInput = Partial<CreateDealInput>;
+
+export interface Destination {
+  city: string;
+  deal_count: number;
+}
+
+export interface PriceAlert {
+  id: number;
+  email: string;
+  departure_city: string;
+  destination_city: string;
+  target_price: number;
+  currency: string;
+  created_at: string;
+}
+
+export interface AnalyticsData {
+  total_deals: number;
+  published_deals: number;
+  total_clicks: number;
+  subscribers: number;
+  top_deals: { id: number; title: string; click_count: number }[];
+}
 
 class ApiError extends Error {
   status: number;
@@ -92,19 +124,87 @@ async function request<T>(
   return res.json();
 }
 
-// Public endpoints
+// ── Public endpoints ──────────────────────────────────
+
+export interface DealFilters {
+  q?: string;
+  departure?: string;
+  destination?: string;
+  min_price?: number;
+  max_price?: number;
+  tag?: string;
+  sort?: "newest" | "oldest" | "price_asc" | "price_desc";
+}
+
 export async function getPublicDeals(
   page = 1,
-  limit = 20
+  limit = 20,
+  filters: DealFilters = {}
 ): Promise<DealsResponse> {
-  return request<DealsResponse>(`/deals?page=${page}&limit=${limit}`);
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("limit", String(limit));
+  if (filters.q) params.set("q", filters.q);
+  if (filters.departure) params.set("departure", filters.departure);
+  if (filters.destination) params.set("destination", filters.destination);
+  if (filters.min_price !== undefined) params.set("min_price", String(filters.min_price));
+  if (filters.max_price !== undefined) params.set("max_price", String(filters.max_price));
+  if (filters.tag) params.set("tag", filters.tag);
+  if (filters.sort) params.set("sort", filters.sort);
+  return request<DealsResponse>(`/deals?${params.toString()}`);
 }
 
 export async function getDealBySlug(slug: string): Promise<Deal> {
   return request<Deal>(`/deals/${slug}`);
 }
 
-// Admin endpoints
+export async function trackClick(slug: string): Promise<void> {
+  await request(`/deals/${slug}/click`, { method: "POST" });
+}
+
+export async function getDestinations(): Promise<{ destinations: Destination[] }> {
+  return request<{ destinations: Destination[] }>("/destinations");
+}
+
+// Newsletter
+export async function subscribe(email: string): Promise<{ message: string }> {
+  return request<{ message: string }>("/subscribe", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function unsubscribe(email: string): Promise<{ message: string }> {
+  return request<{ message: string }>("/subscribe", {
+    method: "DELETE",
+    body: JSON.stringify({ email }),
+  });
+}
+
+// Price alerts
+export async function createPriceAlert(data: {
+  email: string;
+  departure_city?: string;
+  destination_city: string;
+  target_price: number;
+  currency?: string;
+}): Promise<PriceAlert> {
+  return request<PriceAlert>("/price-alerts", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function getPriceAlerts(email: string): Promise<{ alerts: PriceAlert[] }> {
+  return request<{ alerts: PriceAlert[] }>(`/price-alerts?email=${encodeURIComponent(email)}`);
+}
+
+export async function deletePriceAlert(id: number): Promise<{ message: string }> {
+  return request<{ message: string }>(`/price-alerts/${id}`, { method: "DELETE" });
+}
+
+// ── Admin endpoints ──────────────────────────────────
+
 export async function adminLogin(
   email: string,
   password: string
@@ -145,4 +245,15 @@ export async function deleteDeal(id: number): Promise<{ message: string }> {
   return request<{ message: string }>(`/admin/deals/${id}`, {
     method: "DELETE",
   });
+}
+
+export async function getAnalytics(): Promise<AnalyticsData> {
+  return request<AnalyticsData>("/admin/analytics");
+}
+
+export async function getAdminSubscribers(): Promise<{
+  subscribers: { id: number; email: string; created_at: string }[];
+  total: number;
+}> {
+  return request("/admin/subscribers");
 }

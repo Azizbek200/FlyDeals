@@ -63,17 +63,6 @@ func main() {
 		c.JSON(http.StatusOK, status)
 	})
 
-	// Debug endpoint to inspect request headers (remove after debugging)
-	r.GET("/debug/headers", func(c *gin.Context) {
-		headers := make(map[string]string)
-		for k, v := range c.Request.Header {
-			if len(v) > 0 {
-				headers[k] = v[0]
-			}
-		}
-		c.JSON(http.StatusOK, gin.H{"headers": headers, "method": c.Request.Method})
-	})
-
 	// Guard database-dependent routes against nil Pool
 	dbRequired := func(c *gin.Context) {
 		if db.Pool == nil {
@@ -86,10 +75,24 @@ func main() {
 
 	authHandler := handlers.NewAuthHandler(cfg)
 	dealHandler := handlers.NewDealHandler()
+	subscriberHandler := handlers.NewSubscriberHandler()
+	priceAlertHandler := handlers.NewPriceAlertHandler()
+	analyticsHandler := handlers.NewAnalyticsHandler()
 
 	// Public routes
 	r.GET("/deals", dbRequired, dealHandler.ListPublicDeals)
 	r.GET("/deals/:slug", dbRequired, dealHandler.GetPublicDeal)
+	r.POST("/deals/:slug/click", dbRequired, dealHandler.TrackClick)
+	r.GET("/destinations", dbRequired, dealHandler.ListDestinations)
+
+	// Newsletter
+	r.POST("/subscribe", dbRequired, subscriberHandler.Subscribe)
+	r.DELETE("/subscribe", dbRequired, subscriberHandler.Unsubscribe)
+
+	// Price alerts (public)
+	r.POST("/price-alerts", dbRequired, priceAlertHandler.Create)
+	r.GET("/price-alerts", dbRequired, priceAlertHandler.ListByEmail)
+	r.DELETE("/price-alerts/:id", dbRequired, priceAlertHandler.Delete)
 
 	// Auth route
 	r.POST("/admin/login", dbRequired, authHandler.Login)
@@ -102,6 +105,8 @@ func main() {
 		admin.POST("/deals", dealHandler.CreateDeal)
 		admin.PUT("/deals/:id", dealHandler.UpdateDeal)
 		admin.DELETE("/deals/:id", dealHandler.DeleteDeal)
+		admin.GET("/analytics", analyticsHandler.GetAnalytics)
+		admin.GET("/subscribers", subscriberHandler.AdminListSubscribers)
 	}
 
 	// Initialize database in background so server starts immediately

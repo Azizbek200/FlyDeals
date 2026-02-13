@@ -1,11 +1,12 @@
 import Link from "next/link";
+import NewsletterForm from "./NewsletterForm";
 
 export default function Footer() {
   return (
     <footer className="bg-slate-900 text-gray-400 mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-          {/* Brand */}
+          {/* Brand + Newsletter */}
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="text-white text-xl font-bold tracking-tight">
               FlyDeals
@@ -13,6 +14,7 @@ export default function Footer() {
             <p className="mt-3 text-sm leading-relaxed max-w-xs">
               Handpicked flight deals and error fares delivered to you. We scan hundreds of sources so you don&apos;t have to.
             </p>
+            <NewsletterForm variant="footer" />
           </div>
 
           {/* Quick Links */}
@@ -25,8 +27,13 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/admin/login" className="text-sm hover:text-white transition-colors">
-                  Admin Panel
+                <Link href="/destinations" className="text-sm hover:text-white transition-colors">
+                  Destinations
+                </Link>
+              </li>
+              <li>
+                <Link href="/price-alerts" className="text-sm hover:text-white transition-colors">
+                  Price Alerts
                 </Link>
               </li>
             </ul>
